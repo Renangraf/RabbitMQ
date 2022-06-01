@@ -1,0 +1,27 @@
+version: '3.4'
+
+services:
+    rabbitmq:
+        image: rabbitmq:management
+        ports:
+            - '15672:15672'
+            - '5672:5672'
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:15672"]
+            interval: 30s
+            timeout: 10s
+            retries: 5
+    api:
+        build:
+            context: .
+            dockerfile: dockerfile
+        environment:
+            - ASPNETCORE_ENVIRONMENT=Development
+            - HOSTNAMERABBIT=rabbitmq
+        restart: on-failure
+        depends_on:
+            - rabbitmq
+        ports:
+            - '9901:80'
+        links:
+            - rabbitmq
